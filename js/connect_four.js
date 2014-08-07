@@ -3,11 +3,11 @@
  * @author: Vasanth Krishnamoorthy
  */
 
-
 var BOARD_COLS = 7,
 	BOARD_ROWS = 6;
 
 var board = {
+	// Intitialize player/board info
 	init: function () {
 		this.dimensions = {
 			'cols': BOARD_COLS,
@@ -19,9 +19,10 @@ var board = {
 		this.build_board();
 	},
 
+	// Build Board HTML
 	build_board: function () {
 		// Build the board
-		var container = $('#connect-four'),
+		var container = $('#grid'),
 			row = '';
 		container.html('');
 		for (var i = 0; i < this.dimensions.rows; i++) {
@@ -42,14 +43,19 @@ var board = {
 		}
 	},
 
+	// Get position of item
 	get_position: function (item) {
 		var curr_item = $(item),
 			parent = curr_item.parent().children('li');
 		return parent.index(curr_item);
 	},
+
+	// Get bottom free slot's position in current column.
 	get_bottom: function (item) {
 		return game.get_bottom(this.get_position(item));
 	},
+
+	// Display Success Message to user
 	display_msg: function () {
 		var winner_name = '';
 		if (game.winning === 'black') {
@@ -66,12 +72,16 @@ var board = {
 			}
 		}
 	},
+
+	// Clear board
 	clear: function () {
 		$('ul.board li span').removeClass();
 	}
 };
 
 var game = {
+
+	// Initialize board settings/dimensions
 	init: function (dimensions) {
 		this.board = [];
 		this.dimensions = dimensions;
@@ -79,6 +89,7 @@ var game = {
 		this.audio();
 	},
 
+	// Reset board when game over.
 	reset: function () {
 		this.last_play = undefined;
 		this.turn = 'black';
@@ -89,6 +100,7 @@ var game = {
 		}
 	},
 
+	// Add Audio elements
 	audio: function () {
 		this.pieceDropSound = document.createElement('audio');
 		this.pieceDropSound.setAttribute('src', 'audio/piece_drop.mp3');
@@ -99,10 +111,12 @@ var game = {
 		this.gameOverSound.load();
 	},
 
+	// Switch turns after play
 	switch_turns: function () {
 		this.turn = (this.turn === 'black') ? 'red' : 'black';
 	},
 
+	// Check if winner
 	is_winner: function (x, y) {
 		var current = this.last_play,
 			check = this.board[current],
@@ -146,6 +160,7 @@ var game = {
 		return false;
 	},
 
+	// Check winning combinations.
 	check_winner: function () {
 		/// Check for winning values
 		if (this.is_winner(0, 1) || this.is_winner(1, 1) || this.is_winner(1, 0) || this.is_winner(1, -1)) {
@@ -153,11 +168,13 @@ var game = {
 		}
 	},
 
+	// Check if valid move to play
 	can_play: function (col) {
 		/// Check if a column is valid for making a move on.
 		return (this.get_bottom(col) != undefined);
 	},
 
+	// Get bottom available slot in the column
 	get_bottom: function (col) {
 		// Returns the next available slot in a column
 		var bottom = undefined;
@@ -172,6 +189,7 @@ var game = {
 		return bottom;
 	},
 
+	// Check Play
 	play: function (col) {
 		this.pieceDropSound.play();
 
@@ -198,15 +216,21 @@ var game = {
 		return false;
 	},
 
+	// Event listeners on grid elements based on user actions
 	event_listeners: function () {
-		// Handle board mouse movements to show where
-		// a possible placement/move can be made
+		var $drop_area = $('#drop-area').find('span'),
+			animating = false;
+
 		$("ul.board li")
 			.on({
 				mouseenter: function () {
 					var bottom = board.get_bottom(this);
 					if (bottom != undefined) {
-						$($('ul.board li span')[bottom]).addClass(game.turn + "_hover");
+						if (!animating) {
+							var n = bottom % 7;
+							$drop_area.css('left', n * 66 + 11);
+							$($('ul.board li span')[bottom]).addClass(game.turn + "_hover");
+						}
 					}
 				},
 				mouseleave: function () {
@@ -219,7 +243,27 @@ var game = {
 			.on('click', function () {
 				var index = board.get_position(this),
 					bottom = game.get_bottom(index);
-				if (bottom != undefined) {
+				if (bottom != undefined && !animating) {
+					var row = Math.ceil((bottom + 1) / 7),
+						position = row * 75,
+						duration = row * 80 + 150;
+					animating = true;
+					$drop_area.animate({
+						top: position
+					}, {
+						duration: duration,
+						easing: 'easeOutBounce',
+						complete: function () {
+							$drop_area.hide("slow", function () {
+								$(this).css({top: '0px'});
+								setTimeout(function () {
+									$drop_area.removeClass().addClass(game.turn + '_hover').show();
+									animating = false;
+								}, 200);
+							});
+						}
+					});
+
 					var piecePlayed = $("ul.board li span")[bottom];
 					$(piecePlayed).removeClass(game.turn + '_hover').addClass(game.turn);
 					game.play(index);
@@ -241,6 +285,21 @@ $(function () {
 	board.init();
 	game.init(board.dimensions);
 	game.event_listeners();
+});
+
+// jQuery easing
+jQuery.extend(jQuery.easing, {
+	easeOutBounce: function (x, t, b, c, d) {
+		if ((t /= d) < (1 / 2.75)) {
+			return c * (7.5625 * t * t) + b;
+		} else if (t < (2 / 2.75)) {
+			return c * (7.5625 * (t -= (1.5 / 2.75)) * t + .75) + b;
+		} else if (t < (2.5 / 2.75)) {
+			return c * (7.5625 * (t -= (2.25 / 2.75)) * t + .9375) + b;
+		} else {
+			return c * (7.5625 * (t -= (2.625 / 2.75)) * t + .984375) + b;
+		}
+	}
 });
 
 

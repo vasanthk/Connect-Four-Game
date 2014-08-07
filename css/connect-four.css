@@ -27,14 +27,14 @@ h1 {
 	height: 100px;
 }
 
-#connect-four {
+#grid {
 	width: 465px;
 	height: 450px;
 	background-color: #CCC;
 	border-bottom: none;
 	border-top: none;
 	position: relative;
-	z-index: 888;
+	z-index: 900;
 	-webkit-transition: all .1s ease-in-out;
 	-moz-transition: all .1s ease-in-out;
 	-o-transition: all .1s ease-in-out;
@@ -74,6 +74,34 @@ h1 {
 	margin: 2px;
 }
 
+#drop-area li {
+	position: relative;
+	width: 450px;
+	margin: auto;
+	height: 50px;
+	padding: 8px;
+}
+
+#drop-area li span {
+	position: absolute;
+	border-radius: 90px;
+	-moz-border-radius: 90px;
+	-webkit-border-radius: 90px;
+	box-shadow: inset 0 0 10px #222;
+	-moz-box-shadow: inset 0 0 10px #222;
+	-webkit-box-shadow: inset 0 0 10px #222;
+	background-color: #9A9A9A;
+	width: 50px;
+	height: 50px;
+	display: block;
+	-webkit-transition: all .4s ease-in-out;
+	-moz-transition: all .4s ease-in-out;
+	-o-transition: all .4s ease-in-out;
+	margin: 0 auto;
+	left: 11px;
+	z-index: 1000;
+}
+
 #connect-four ul.board li span.red {
 	background: rgba(200, 10, 10, 0.95);
 	box-shadow: inset 0 0 12px #444;
@@ -81,7 +109,7 @@ h1 {
 	-webkit-box-shadow: inset 0 0 12px #444;
 }
 
-#connect-four ul.board li span.red_hover {
+#connect-four ul.board li span.red_hover, #drop-area .red_hover {
 	background: rgba(200, 10, 10, 0.7);
 	box-shadow: 0 0 20px 10px #fff;
 }
@@ -97,7 +125,7 @@ h1 {
 	-webkit-box-shadow: inset 0 0 12px #444;
 }
 
-#connect-four ul.board li span.black_hover {
+#connect-four ul.board li span.black_hover, #drop-area .black_hover {
 	background: rgba(20, 20, 20, 0.7);
 	box-shadow: 0 0 20px 10px #fff;
 }
